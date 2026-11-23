@@ -18,13 +18,9 @@ Return a user or a kernel stack in bpf program provided buffer. Note: the user s
 
 The last argument, _flags_, holds the number of stack frames to skip (from 0 to 255), masked with **BPF_F_SKIP_FIELD_MASK**. The next bits can be used to set the following flags:
 
-**BPF_F_USER_STACK**
+* **BPF_F_USER_STACK**: Collect a user space stack instead of a kernel stack. The _task_ must be the current task.
 
-&nbsp;&nbsp;&nbsp;&nbsp;Collect a user space stack instead of a kernel stack. The _task_ must be the current task.
-
-**BPF_F_USER_BUILD_ID**
-
-&nbsp;&nbsp;&nbsp;&nbsp;Collect buildid+offset instead of ips for user stack, only valid if **BPF_F_USER_STACK** is also specified.
+* **BPF_F_USER_BUILD_ID**: Collect buildid+offset instead of ips for user stack, only valid if **BPF_F_USER_STACK** is also specified.
 
 **bpf_get_task_stack**() can collect up to **PERF_MAX_STACK_DEPTH** both kernel and user frames, subject to sufficient large buffer size. Note that this limit can be controlled with the **sysctl** program, and that it should be manually increased in order to profile long user stacks (such as stacks for Java programs). To do so, use:
 
@@ -50,14 +46,36 @@ This helper call can be used in the following program types:
 
 <!-- DO NOT EDIT MANUALLY -->
 <!-- [HELPER_FUNC_PROG_REF] -->
+ * [`BPF_PROG_TYPE_CGROUP_DEVICE`](../program-type/BPF_PROG_TYPE_CGROUP_DEVICE.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
+ * [`BPF_PROG_TYPE_CGROUP_SKB`](../program-type/BPF_PROG_TYPE_CGROUP_SKB.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
+ * [`BPF_PROG_TYPE_CGROUP_SOCK`](../program-type/BPF_PROG_TYPE_CGROUP_SOCK.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
+ * [`BPF_PROG_TYPE_CGROUP_SOCKOPT`](../program-type/BPF_PROG_TYPE_CGROUP_SOCKOPT.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
+ * [`BPF_PROG_TYPE_CGROUP_SOCK_ADDR`](../program-type/BPF_PROG_TYPE_CGROUP_SOCK_ADDR.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
+ * [`BPF_PROG_TYPE_CGROUP_SYSCTL`](../program-type/BPF_PROG_TYPE_CGROUP_SYSCTL.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
+ * [`BPF_PROG_TYPE_FLOW_DISSECTOR`](../program-type/BPF_PROG_TYPE_FLOW_DISSECTOR.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
  * [`BPF_PROG_TYPE_KPROBE`](../program-type/BPF_PROG_TYPE_KPROBE.md)
  * [`BPF_PROG_TYPE_LSM`](../program-type/BPF_PROG_TYPE_LSM.md)
+ * [`BPF_PROG_TYPE_LWT_IN`](../program-type/BPF_PROG_TYPE_LWT_IN.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
+ * [`BPF_PROG_TYPE_LWT_OUT`](../program-type/BPF_PROG_TYPE_LWT_OUT.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
+ * [`BPF_PROG_TYPE_LWT_SEG6LOCAL`](../program-type/BPF_PROG_TYPE_LWT_SEG6LOCAL.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
+ * [`BPF_PROG_TYPE_LWT_XMIT`](../program-type/BPF_PROG_TYPE_LWT_XMIT.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
+ * [`BPF_PROG_TYPE_NETFILTER`](../program-type/BPF_PROG_TYPE_NETFILTER.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
  * [`BPF_PROG_TYPE_PERF_EVENT`](../program-type/BPF_PROG_TYPE_PERF_EVENT.md)
  * [`BPF_PROG_TYPE_RAW_TRACEPOINT`](../program-type/BPF_PROG_TYPE_RAW_TRACEPOINT.md)
  * [`BPF_PROG_TYPE_RAW_TRACEPOINT_WRITABLE`](../program-type/BPF_PROG_TYPE_RAW_TRACEPOINT_WRITABLE.md)
+ * [`BPF_PROG_TYPE_SCHED_ACT`](../program-type/BPF_PROG_TYPE_SCHED_ACT.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
+ * [`BPF_PROG_TYPE_SCHED_CLS`](../program-type/BPF_PROG_TYPE_SCHED_CLS.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
+ * [`BPF_PROG_TYPE_SK_LOOKUP`](../program-type/BPF_PROG_TYPE_SK_LOOKUP.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
+ * [`BPF_PROG_TYPE_SK_MSG`](../program-type/BPF_PROG_TYPE_SK_MSG.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
+ * [`BPF_PROG_TYPE_SK_REUSEPORT`](../program-type/BPF_PROG_TYPE_SK_REUSEPORT.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
+ * [`BPF_PROG_TYPE_SK_SKB`](../program-type/BPF_PROG_TYPE_SK_SKB.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
+ * [`BPF_PROG_TYPE_SOCKET_FILTER`](../program-type/BPF_PROG_TYPE_SOCKET_FILTER.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
+ * [`BPF_PROG_TYPE_SOCK_OPS`](../program-type/BPF_PROG_TYPE_SOCK_OPS.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
+ * [`BPF_PROG_TYPE_STRUCT_OPS`](../program-type/BPF_PROG_TYPE_STRUCT_OPS.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
  * [`BPF_PROG_TYPE_SYSCALL`](../program-type/BPF_PROG_TYPE_SYSCALL.md)
  * [`BPF_PROG_TYPE_TRACEPOINT`](../program-type/BPF_PROG_TYPE_TRACEPOINT.md)
  * [`BPF_PROG_TYPE_TRACING`](../program-type/BPF_PROG_TYPE_TRACING.md)
+ * [`BPF_PROG_TYPE_XDP`](../program-type/BPF_PROG_TYPE_XDP.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
 <!-- [/HELPER_FUNC_PROG_REF] -->
 
 ### Example

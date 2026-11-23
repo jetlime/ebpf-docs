@@ -3,6 +3,8 @@ bpf
 BPF
 eBPF
 cBPF
+cid
+cids
 bpftool
 bpffs
 bpftrace
@@ -101,6 +103,7 @@ ABI
 PMU
 TCP
 BBR
+SMC
 XFRM
 VRF
 FOU
@@ -267,6 +270,7 @@ vtime
 runnable
 runqueue
 dequeue
+dequeued
 Dequeue
 unregistration
 unregister
@@ -284,3 +288,6 @@ xattr
 SMP
 NMI
 profiler
+profilers
+workqueue
+ICMP

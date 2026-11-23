@@ -26,11 +26,11 @@ This field holds the **total** length of the packet. It is important to know tha
 This field indicates the type of the packet which informs "who" the packet is for. Possible values of this field are
 the `PACKET_*` values defined in `include/uapi/linux/if_packet.h`.
 
-* `PACKET_HOST` - indicates the packet is addresses to the MAC address of this host
+* `PACKET_HOST` - indicates the packet is addressed to the MAC address of this host
 * `PACKET_BROADCAST` - indicates the packet is addressed to a broadcast address.
 * `PACKET_MULTICAST` - indicates the packet is addressed to a multicast address.
-* `PACKET_OTHERHOST` - indicates the packet to addressed to some other host that it has been caught by a device driver in promiscuous mode
-* `PACKET_OUTGOING` - indicates the packet originating from the local host that is looped back to a packet socket
+* `PACKET_OTHERHOST` - indicates the packet is addressed to some other host but has been caught by a device driver in promiscuous mode
+* `PACKET_OUTGOING` - indicates that the packet originates from the local host and is looped back to a packet socket
 
 !!! note
     This is not an exhaustive list of possible values.
@@ -180,7 +180,7 @@ This field is a pointer to a `struct bpf_flow_keys` which like the name implies 
 This field indicates the time when this packet should be transmitted in nanoseconds since boot. [`BPF_PROG_TYPE_SCHED_CLS`](../program-type/BPF_PROG_TYPE_SCHED_CLS.md) programs can set this time to some time in the future to add delay to packets for the purposes of bandwidth limiting or simulating latency. Setting this value only works on egress if the `fq` (Fair Queue) qdisc is used.
 
 !!! note
-    The `fq` qdisc has a "drop horizon" if packets are set to transmit to far into the future they will be dropped to avoid queueing to many packets.
+    The `fq` qdisc has a "drop horizon" if packets are set to transmit to far into the future they will be dropped to avoid queueing too many packets.
 
 !!! note
     After v5.18 [1](https://github.com/torvalds/linux/commit/8d21ec0e46ed6e39994accff8eb4f2be3d2e76b5) / [2](https://github.com/torvalds/linux/commit/9bb984f28d5bcb917d35d930fcfb89f90f9449fd) the meaning of this field can also be "received time" and the [`tstamp_type`](#tstamp_type) field will indicate one or the other.

@@ -33,7 +33,7 @@ The timers are attached to the life cycle of the map, if the map is freed/delete
 
 Pending timers will keep a reference to the program containing the callback, so even if no other references exist, programs will stay loaded until all timers have fired or are canceled.
 
-A timer has to be initialized with the [`bpf_timer_init`](../helper-function/bpf_timer_init.md) helper function. After initialization a callback can be assigned to the timer with the [`bpf_timer_set_callback`](../helper-function/bpf_timer_set_callback.md) helper function. Lastly the timer is started with the [`bpf_timer_start`](../helper-function/bpf_timer_start.md) helper function. A pending timer can also be canceled with the [`bpf_timer_cancel`](../helper-function/bpf_timer_cancel.md) helper function.
+A timer has to be initialized with the [`bpf_timer_init`](../helper-function/bpf_timer_init.md) helper function. After initialization a callback can be assigned to the timer with the [`bpf_timer_set_callback`](../helper-function/bpf_timer_set_callback.md) helper function. Lastly the timer is started with the [`bpf_timer_start`](../helper-function/bpf_timer_start.md) helper function. A pending timer can also be canceled with the [`bpf_timer_cancel`](../helper-function/bpf_timer_cancel.md) helper function, which blocks until any currently-running callback completes. In contexts where blocking is undesirable, the [`bpf_timer_cancel_async`](../kfuncs/bpf_timer_cancel_async.md)kfunc can be used instead. `bpf_timer_cancel_async` returns `-ECANCELED` when the cancellation must be deferred asynchronously rather than waiting for the callback to finish.
 
 These three helper calls do not necessarily have to happen in the same program at the same time. The following use case is valid:
 
@@ -54,5 +54,7 @@ The callback is invoked with a pointer to the map, map key, and map value associ
     The callback function *must* always return `0`, otherwise the verifier will reject the program.
 
 A callback can chose to re-schedule its own timer by calling [`bpf_timer_start`](../helper-function/bpf_timer_start.md) on `value->timer`. Thus making it possible to not just have a one shot delay from a given eBPF program run, but to have a periodic function running endlessly after just a single trigger event.
+
+Canceling a timer with [`bpf_timer_cancel`](../helper-function/bpf_timer_cancel.md) also detaches its callback. A canceled timer is still initialized, calling [`bpf_timer_init`](../helper-function/bpf_timer_init.md) on it again returns `-EBUSY`, but starting it returns `-EINVAL` until [`bpf_timer_set_callback`](../helper-function/bpf_timer_set_callback.md) has assigned a new callback. So the cycle to reuse a canceled timer is `bpf_timer_set_callback` followed by [`bpf_timer_start`](../helper-function/bpf_timer_start.md), without a new `bpf_timer_init`.
 
 

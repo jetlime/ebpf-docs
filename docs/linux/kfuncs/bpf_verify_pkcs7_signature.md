@@ -17,7 +17,7 @@ Verify the <nospell>PKCS#7</nospell> signature `sig_ptr` against the supplied `d
 **Signature**
 
 <!-- [KFUNC_DEF] -->
-`#!c int bpf_verify_pkcs7_signature(struct bpf_dynptr *data_p, struct bpf_dynptr *sig_p, struct bpf_key *trusted_keyring)`
+`#!c int bpf_verify_pkcs7_signature(const struct bpf_dynptr *data_p, const struct bpf_dynptr *sig_p, struct bpf_key *trusted_keyring)`
 
 !!! note
     This function may sleep, and therefore can only be used from [sleepable programs](../syscall/BPF_PROG_LOAD.md/#bpf_f_sleepable).
@@ -34,8 +34,6 @@ The following program types can make use of this kfunc:
 
 <!-- [KFUNC_PROG_REF] -->
 - [`BPF_PROG_TYPE_LSM`](../program-type/BPF_PROG_TYPE_LSM.md)
-- [`BPF_PROG_TYPE_PERF_EVENT`](../program-type/BPF_PROG_TYPE_PERF_EVENT.md) [:octicons-tag-24: v6.12](https://github.com/torvalds/linux/commit/bc638d8cb5be813d4eeb9f63cce52caaa18f3960) - 
-- [`BPF_PROG_TYPE_TRACEPOINT`](../program-type/BPF_PROG_TYPE_TRACEPOINT.md) [:octicons-tag-24: v6.12](https://github.com/torvalds/linux/commit/bc638d8cb5be813d4eeb9f63cce52caaa18f3960) - 
 - [`BPF_PROG_TYPE_TRACING`](../program-type/BPF_PROG_TYPE_TRACING.md)
 <!-- [/KFUNC_PROG_REF] -->
 

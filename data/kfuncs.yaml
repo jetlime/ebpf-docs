@@ -132,14 +132,24 @@ sets:
         flags: [KF_DESTRUCTIVE]
       - name: bpf_obj_new_impl
         flags: [KF_ACQUIRE, KF_RET_NULL]
+      - name: bpf_obj_new
+        flags: [KF_ACQUIRE, KF_RET_NULL, KF_IMPLICIT_ARGS]
       - name: bpf_percpu_obj_new_impl
         flags: [KF_ACQUIRE, KF_RET_NULL]
+      - name: bpf_percpu_obj_new
+        flags: [KF_ACQUIRE, KF_RET_NULL, KF_IMPLICIT_ARGS]
       - name: bpf_obj_drop_impl
         flags: [KF_RELEASE]
+      - name: bpf_obj_drop
+        flags: [KF_RELEASE, KF_IMPLICIT_ARGS]
       - name: bpf_percpu_obj_drop_impl
         flags: [KF_RELEASE]
+      - name: bpf_percpu_obj_drop
+        flags: [KF_RELEASE, KF_IMPLICIT_ARGS]
       - name: bpf_refcount_acquire_impl
         flags: [KF_ACQUIRE, KF_RET_NULL, KF_RCU]
+      - name: bpf_refcount_acquire
+        flags: [KF_ACQUIRE, KF_RET_NULL, KF_RCU, KF_IMPLICIT_ARGS]
       - name: bpf_list_push_front_impl
         except: # kfunc excluded by https://elixir.bootlin.com/linux/v6.18.6/source/kernel/bpf/verifier.c#L20412
           program_types: # For tracing programs https://elixir.bootlin.com/linux/v6.18.6/source/kernel/bpf/verifier.c#L20376
@@ -148,7 +158,34 @@ sets:
             - name: BPF_PROG_TYPE_PERF_EVENT
             - name: BPF_PROG_TYPE_RAW_TRACEPOINT
             - name: BPF_PROG_TYPE_RAW_TRACEPOINT_WRITABLE
+      - name: bpf_list_push_front
+        flags: [KF_IMPLICIT_ARGS]
+        except: # kfunc excluded by https://elixir.bootlin.com/linux/v6.18.6/source/kernel/bpf/verifier.c#L20412
+          program_types: # For tracing programs https://elixir.bootlin.com/linux/v6.18.6/source/kernel/bpf/verifier.c#L20376
+            - name: BPF_PROG_TYPE_KPROBE
+            - name: BPF_PROG_TYPE_TRACEPOINT
+            - name: BPF_PROG_TYPE_PERF_EVENT
+            - name: BPF_PROG_TYPE_RAW_TRACEPOINT
+            - name: BPF_PROG_TYPE_RAW_TRACEPOINT_WRITABLE
+      - name: bpf_list_push_front
+        flags: [KF_IMPLICIT_ARGS]
+        except: # kfunc excluded by https://elixir.bootlin.com/linux/v6.18.6/source/kernel/bpf/verifier.c#L20412
+          program_types: # For tracing programs https://elixir.bootlin.com/linux/v6.18.6/source/kernel/bpf/verifier.c#L20376
+            - name: BPF_PROG_TYPE_KPROBE
+            - name: BPF_PROG_TYPE_TRACEPOINT
+            - name: BPF_PROG_TYPE_PERF_EVENT
+            - name: BPF_PROG_TYPE_RAW_TRACEPOINT
+            - name: BPF_PROG_TYPE_RAW_TRACEPOINT_WRITABLE
       - name: bpf_list_push_back_impl
+        except: # kfunc excluded by https://elixir.bootlin.com/linux/v6.18.6/source/kernel/bpf/verifier.c#L20412
+          program_types: # For tracing programs https://elixir.bootlin.com/linux/v6.18.6/source/kernel/bpf/verifier.c#L20376
+            - name: BPF_PROG_TYPE_KPROBE
+            - name: BPF_PROG_TYPE_TRACEPOINT
+            - name: BPF_PROG_TYPE_PERF_EVENT
+            - name: BPF_PROG_TYPE_RAW_TRACEPOINT
+            - name: BPF_PROG_TYPE_RAW_TRACEPOINT_WRITABLE
+      - name: bpf_list_push_back
+        flags: [KF_IMPLICIT_ARGS]
         except: # kfunc excluded by https://elixir.bootlin.com/linux/v6.18.6/source/kernel/bpf/verifier.c#L20412
           program_types: # For tracing programs https://elixir.bootlin.com/linux/v6.18.6/source/kernel/bpf/verifier.c#L20376
             - name: BPF_PROG_TYPE_KPROBE
@@ -181,6 +218,15 @@ sets:
       - name: bpf_rbtree_remove
         flags: [KF_ACQUIRE, KF_RET_NULL]
       - name: bpf_rbtree_add_impl
+        except: # kfunc excluded by https://elixir.bootlin.com/linux/v6.18.6/source/kernel/bpf/verifier.c#L20412
+          program_types: # For tracing programs https://elixir.bootlin.com/linux/v6.18.6/source/kernel/bpf/verifier.c#L20376
+            - name: BPF_PROG_TYPE_KPROBE
+            - name: BPF_PROG_TYPE_TRACEPOINT
+            - name: BPF_PROG_TYPE_PERF_EVENT
+            - name: BPF_PROG_TYPE_RAW_TRACEPOINT
+            - name: BPF_PROG_TYPE_RAW_TRACEPOINT_WRITABLE
+      - name: bpf_rbtree_add
+        flags: [KF_IMPLICIT_ARGS]
         except: # kfunc excluded by https://elixir.bootlin.com/linux/v6.18.6/source/kernel/bpf/verifier.c#L20412
           program_types: # For tracing programs https://elixir.bootlin.com/linux/v6.18.6/source/kernel/bpf/verifier.c#L20376
             - name: BPF_PROG_TYPE_KPROBE
@@ -256,6 +302,48 @@ sets:
             - name: BPF_PROG_TYPE_PERF_EVENT
             - name: BPF_PROG_TYPE_RAW_TRACEPOINT
             - name: BPF_PROG_TYPE_RAW_TRACEPOINT_WRITABLE
+      - name: bpf_list_del
+        flags: [KF_ACQUIRE, KF_RET_NULL]
+        except: # kfunc excluded by https://elixir.bootlin.com/linux/v7.2.2/source/kernel/bpf/verifier.c#L17751
+          program_types: # For tracing programs https://elixir.bootlin.com/linux/v7.2.2/source/kernel/bpf/verifier.c#L17715
+            - name: BPF_PROG_TYPE_KPROBE
+            - name: BPF_PROG_TYPE_TRACEPOINT
+            - name: BPF_PROG_TYPE_PERF_EVENT
+            - name: BPF_PROG_TYPE_RAW_TRACEPOINT
+            - name: BPF_PROG_TYPE_RAW_TRACEPOINT_WRITABLE
+      - name: bpf_list_add
+        flags: [KF_IMPLICIT_ARGS]
+        except: # kfunc excluded by https://elixir.bootlin.com/linux/v7.2.2/source/kernel/bpf/verifier.c#L17751
+          program_types: # For tracing programs https://elixir.bootlin.com/linux/v7.2.2/source/kernel/bpf/verifier.c#L17715
+            - name: BPF_PROG_TYPE_KPROBE
+            - name: BPF_PROG_TYPE_TRACEPOINT
+            - name: BPF_PROG_TYPE_PERF_EVENT
+            - name: BPF_PROG_TYPE_RAW_TRACEPOINT
+            - name: BPF_PROG_TYPE_RAW_TRACEPOINT_WRITABLE
+      - name: bpf_list_is_first
+        except: # kfunc excluded by https://elixir.bootlin.com/linux/v7.2.2/source/kernel/bpf/verifier.c#L17751
+          program_types: # For tracing programs https://elixir.bootlin.com/linux/v7.2.2/source/kernel/bpf/verifier.c#L17715
+            - name: BPF_PROG_TYPE_KPROBE
+            - name: BPF_PROG_TYPE_TRACEPOINT
+            - name: BPF_PROG_TYPE_PERF_EVENT
+            - name: BPF_PROG_TYPE_RAW_TRACEPOINT
+            - name: BPF_PROG_TYPE_RAW_TRACEPOINT_WRITABLE
+      - name: bpf_list_is_last
+        except: # kfunc excluded by https://elixir.bootlin.com/linux/v7.2.2/source/kernel/bpf/verifier.c#L17751
+          program_types: # For tracing programs https://elixir.bootlin.com/linux/v7.2.2/source/kernel/bpf/verifier.c#L17715
+            - name: BPF_PROG_TYPE_KPROBE
+            - name: BPF_PROG_TYPE_TRACEPOINT
+            - name: BPF_PROG_TYPE_PERF_EVENT
+            - name: BPF_PROG_TYPE_RAW_TRACEPOINT
+            - name: BPF_PROG_TYPE_RAW_TRACEPOINT_WRITABLE
+      - name: bpf_list_empty
+        except: # kfunc excluded by https://elixir.bootlin.com/linux/v7.2.2/source/kernel/bpf/verifier.c#L17751
+          program_types: # For tracing programs https://elixir.bootlin.com/linux/v7.2.2/source/kernel/bpf/verifier.c#L17715
+            - name: BPF_PROG_TYPE_KPROBE
+            - name: BPF_PROG_TYPE_TRACEPOINT
+            - name: BPF_PROG_TYPE_PERF_EVENT
+            - name: BPF_PROG_TYPE_RAW_TRACEPOINT
+            - name: BPF_PROG_TYPE_RAW_TRACEPOINT_WRITABLE
     program_types:
       - name: BPF_PROG_TYPE_TRACING
       - name: BPF_PROG_TYPE_TRACEPOINT
@@ -326,6 +414,14 @@ sets:
             - name: BPF_PROG_TYPE_PERF_EVENT
             - name: BPF_PROG_TYPE_RAW_TRACEPOINT
             - name: BPF_PROG_TYPE_RAW_TRACEPOINT_WRITABLE
+      - name: bpf_wq_set_callback
+        except: # kfunc excluded by https://elixir.bootlin.com/linux/v6.18.6/source/kernel/bpf/verifier.c#L20438
+          program_types: # For tracing programs https://elixir.bootlin.com/linux/v6.18.6/source/kernel/bpf/verifier.c#L20376
+            - name: BPF_PROG_TYPE_KPROBE
+            - name: BPF_PROG_TYPE_TRACEPOINT
+            - name: BPF_PROG_TYPE_PERF_EVENT
+            - name: BPF_PROG_TYPE_RAW_TRACEPOINT
+            - name: BPF_PROG_TYPE_RAW_TRACEPOINT_WRITABLE
       - name: bpf_wq_set_callback_impl
         except: # kfunc excluded by https://elixir.bootlin.com/linux/v6.18.6/source/kernel/bpf/verifier.c#L20438
           program_types: # For tracing programs https://elixir.bootlin.com/linux/v6.18.6/source/kernel/bpf/verifier.c#L20376
@@ -384,6 +480,7 @@ sets:
       - name: bpf_strcspn
       - name: bpf_strlen
       - name: bpf_strnchr
+      - name: bpf_strncasecmp
       - name: bpf_strnlen
       - name: bpf_strnstr
       - name: bpf_strrchr
@@ -398,17 +495,26 @@ sets:
         flags: [KF_ITER_NEW, KF_SLEEPABLE]
       - name: bpf_iter_dmabuf_next
         flags: [KF_ITER_NEXT, KF_RET_NULL, KF_SLEEPABLE]
+      - name: bpf_stream_print_stack
+        flags: [KF_TRUSTED_ARGS]
+      - name: bpf_stream_vprintk
+        flags: [KF_TRUSTED_ARGS]
       - name: bpf_stream_vprintk_impl
         flags: [KF_TRUSTED_ARGS]
       - name: bpf_cgroup_read_xattr
         flags: [KF_RCU]
+      - name: bpf_task_work_schedule_signal
+        flags: [KF_TRUSTED_ARGS]
       - name: bpf_task_work_schedule_signal_impl
+        flags: [KF_TRUSTED_ARGS]
+      - name: bpf_task_work_schedule_resume
         flags: [KF_TRUSTED_ARGS]
       - name: bpf_task_work_schedule_resume_impl
         flags: [KF_TRUSTED_ARGS]
       - name: bpf_dynptr_from_file
         flags: [KF_TRUSTED_ARGS]
       - name: bpf_dynptr_file_discard
+      - name: bpf_timer_cancel_async
     program_types:
       - name: BPF_PROG_TYPE_UNSPEC
 
@@ -556,6 +662,7 @@ sets:
       - name: bbr_sndbuf_expand
       - name: bbr_undo_cwnd
       - name: bbr_cwnd_event
+      - name: bbr_cwnd_event_tx_start
       - name: bbr_ssthresh
       - name: bbr_min_tso_segs
       - name: bbr_set_state
@@ -576,6 +683,7 @@ sets:
       - name: cubictcp_cong_avoid
       - name: cubictcp_state
       - name: cubictcp_cwnd_event
+      - name: cubictcp_cwnd_event_tx_start
       - name: cubictcp_acked
     program_types:
       - name: BPF_PROG_TYPE_STRUCT_OPS
@@ -585,6 +693,7 @@ sets:
       - name: dctcp_init
       - name: dctcp_update_alpha
       - name: dctcp_cwnd_event
+      - name: dctcp_cwnd_event_tx_start
       - name: dctcp_ssthresh
       - name: dctcp_cwnd_undo
       - name: dctcp_state
@@ -786,6 +895,7 @@ sets:
       - name: scx_bpf_dispatch_nr_slots
       - name: scx_bpf_dispatch_cancel
       - name: scx_bpf_dsq_move_to_local
+      - name: scx_bpf_dsq_move_to_local___v2
       - name: scx_bpf_consume
       - name: scx_bpf_dsq_move_set_slice
       - name: scx_bpf_dsq_move_set_vtime
@@ -799,6 +909,8 @@ sets:
         flags: [KF_RCU]
       - name: scx_bpf_dispatch_vtime_from_dsq
         flags: [KF_RCU]
+      - name: scx_bpf_sub_dispatch
+        flags: [KF_IMPLICIT_ARGS]
     program_types:
       - name: BPF_PROG_TYPE_STRUCT_OPS
 
@@ -839,6 +951,8 @@ sets:
       - name: scx_bpf_destroy_dsq
       - name: scx_bpf_dsq_peek
         flags: [KF_RCU_PROTECTED, KF_RET_NULL]
+      - name: scx_bpf_dsq_reenq
+        flags: [KF_IMPLICIT_ARGS]
       - name: bpf_iter_scx_dsq_new
         flags: [KF_ITER_NEW, KF_RCU_PROTECTED]
       - name: bpf_iter_scx_dsq_next
@@ -901,6 +1015,36 @@ sets:
       - name: scx_bpf_reenqueue_local___v2
       - name: __scx_bpf_select_cpu_and
         flags: [KF_RCU]
+      - name: scx_bpf_tid_to_task
+        flags: [KF_RET_NULL, KF_RCU_PROTECTED]
+      - name: scx_bpf_kick_cid
+        flags: [KF_IMPLICIT_ARGS]
+      - name: scx_bpf_cidperf_cap
+        flags: [KF_IMPLICIT_ARGS]
+      - name: scx_bpf_cidperf_cur
+        flags: [KF_IMPLICIT_ARGS]
+      - name: scx_bpf_cidperf_set
+        flags: [KF_IMPLICIT_ARGS]
+      - name: scx_bpf_nr_cids
+        flags: [KF_IMPLICIT_ARGS]
+      - name: scx_bpf_nr_online_cids
+        flags: [KF_IMPLICIT_ARGS]
+      - name: scx_bpf_this_cid
+        flags: [KF_IMPLICIT_ARGS]
+      - name: scx_bpf_cid_curr
+        flags: [KF_IMPLICIT_ARGS, KF_RET_NULL, KF_RCU_PROTECTED]
+      - name: scx_bpf_task_cid
+        flags: [KF_RCU]
+      - name: scx_bpf_online_cmask
+        flags: [KF_IMPLICIT_ARGS, KF_ARENA_RET]
+      - name: scx_bpf_sub_grant
+        flags: [KF_IMPLICIT_ARGS]
+      - name: scx_bpf_sub_revoke
+        flags: [KF_IMPLICIT_ARGS]
+      - name: scx_bpf_sub_caps
+        flags: [KF_IMPLICIT_ARGS]
+      - name: scx_bpf_sub_kill_bstr
+        flags: [KF_IMPLICIT_ARGS]
     program_types:
       - name: BPF_PROG_TYPE_STRUCT_OPS
       - name: BPF_PROG_TYPE_SYSCALL
@@ -931,6 +1075,10 @@ sets:
         flags: [KF_SLEEPABLE, KF_TRUSTED_ARGS]
       - name: bpf_remove_dentry_xattr
         flags: [KF_SLEEPABLE, KF_TRUSTED_ARGS]
+      - name: bpf_real_data_inode
+        flags: [KF_SLEEPABLE, KF_RET_NULL]
+      - name: bpf_sock_read_xattr
+        flags: [KF_RCU]
     program_types:
       - name: BPF_PROG_TYPE_TRACING
       - name: BPF_PROG_TYPE_TRACEPOINT
@@ -1034,3 +1182,86 @@ sets:
     program_types:
       - name: BPF_PROG_TYPE_SCHED_ACT
       - name: BPF_PROG_TYPE_SCHED_CLS
+
+  io_uring_kfunc_set:
+    funcs:
+      - name: bpf_io_uring_submit_sqes
+        flags: [KF_SLEEPABLE]
+      - name: bpf_io_uring_get_region
+        flags: [KF_RET_NULL]
+    program_types:
+      - name: BPF_PROG_TYPE_STRUCT_OPS
+
+  bpf_memcontrol_kfunc_set:
+    funcs:
+      - name: bpf_get_root_mem_cgroup
+        flags: [KF_ACQUIRE, KF_RET_NULL]
+      - name: bpf_get_mem_cgroup
+        flags: [KF_ACQUIRE, KF_RET_NULL, KF_RCU]
+      - name: bpf_put_mem_cgroup
+        flags: [KF_RELEASE]
+      - name: bpf_mem_cgroup_vm_events
+      - name: bpf_mem_cgroup_memory_events
+      - name: bpf_mem_cgroup_usage
+      - name: bpf_mem_cgroup_page_state
+      - name: bpf_mem_cgroup_flush_stats
+        flags: [KF_SLEEPABLE]
+    program_types:
+      - name: BPF_PROG_TYPE_UNSPEC
+
+  scx_kfunc_set_cid:
+    funcs:
+      - name: scx_bpf_cid_to_cpu
+        flags: [KF_IMPLICIT_ARGS]
+      - name: scx_bpf_cpu_to_cid
+        flags: [KF_IMPLICIT_ARGS]
+      - name: scx_bpf_cid_topo
+        flags: [KF_IMPLICIT_ARGS]
+    program_types:
+      - name: BPF_PROG_TYPE_STRUCT_OPS
+      - name: BPF_PROG_TYPE_TRACING
+      - name: BPF_PROG_TYPE_SYSCALL
+
+  scx_kfunc_set_init:
+    funcs:
+      - name: scx_bpf_cid_override
+        flags: [KF_SLEEPABLE, KF_IMPLICIT_ARGS]
+    program_types:
+      - name: BPF_PROG_TYPE_STRUCT_OPS
+
+  wakeup_source_kfunc_set:
+    funcs:
+      - name: bpf_wakeup_sources_read_lock
+        flags: [KF_ACQUIRE]
+      - name: bpf_wakeup_sources_read_unlock
+        flags: [KF_RELEASE]
+      - name: bpf_wakeup_sources_get_head
+    program_types:
+      - name: BPF_PROG_TYPE_SYSCALL
+
+  bpf_kfunc_check_set_icmp_send:
+    funcs:
+      - name: bpf_icmp_send
+    program_types:
+      - name: BPF_PROG_TYPE_CGROUP_SKB
+
+  ksock_init_kfunc_btf_ids:
+    funcs:
+      - name: bpf_ksock_create
+        flags: [KF_ACQUIRE, KF_RET_NULL, KF_SLEEPABLE]
+      - name: bpf_ksock_connect
+        flags: [KF_SLEEPABLE]
+    program_types:
+      - name: BPF_PROG_TYPE_SYSCALL
+
+  ksock_kfunc_btf_ids:
+    funcs:
+      - name: bpf_ksock_release
+        flags: [KF_RELEASE]
+      - name: bpf_ksock_acquire
+        flags: [KF_ACQUIRE, KF_RCU, KF_RET_NULL]
+      - name: bpf_ksock_send
+        flags: [KF_SLEEPABLE]
+    program_types:
+      - name: BPF_PROG_TYPE_SYSCALL
+      - name: BPF_PROG_TYPE_LSM

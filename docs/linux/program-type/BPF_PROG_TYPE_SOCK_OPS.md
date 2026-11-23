@@ -175,6 +175,7 @@ When the `BPF_SOCK_OPS_WRITE_HDR_OPT_CB_FLAG` flag is set with [`bpf_sock_ops_cb
 The arguments in the context will have the following meanings:
 
 * `args[0]`: bool want_cookie. (in writing SYNACK only)
+* `args[0]`: (when not writing SYNACK) If equal to `BPF_WRITE_HDR_TCP_CURRENT_MSS`, the kernel will use the `bpf_reserve_hdr_opt()` call to guess the future packet's size and not actually reserve memory. The skb passed as a parameter is empty dummy and no subsequent `BPF_SOCK_OPS_WRITE_HDR_OPT_CB` event will occur.
 
 `sock_ops->skb_data`: Not available because no header has been written yet.
 
@@ -413,7 +414,7 @@ The remote data link / layer 4 port in network byte order.
 
 [:octicons-tag-24: v4.13](https://github.com/torvalds/linux/commit/40304b2a1567fecc321f640ee4239556dd0f3ee0)
 
-The local data link / layer 4 port in network byte order.
+The local data link / layer 4 port in host byte order.
 
 ### `is_fullsock`
 	
@@ -850,16 +851,22 @@ Socket ops programs are attached to cGroups via the [`BPF_PROG_ATTACH`](../sysca
 ??? abstract "Supported helper functions"
     * [`bpf_cgrp_storage_delete`](../helper-function/bpf_cgrp_storage_delete.md)
     * [`bpf_cgrp_storage_get`](../helper-function/bpf_cgrp_storage_get.md)
+    * [`bpf_current_task_under_cgroup`](../helper-function/bpf_current_task_under_cgroup.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
     * [`bpf_dynptr_data`](../helper-function/bpf_dynptr_data.md)
     * [`bpf_dynptr_from_mem`](../helper-function/bpf_dynptr_from_mem.md)
     * [`bpf_dynptr_read`](../helper-function/bpf_dynptr_read.md)
     * [`bpf_dynptr_write`](../helper-function/bpf_dynptr_write.md)
+    * [`bpf_find_vma`](../helper-function/bpf_find_vma.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
     * [`bpf_for_each_map_elem`](../helper-function/bpf_for_each_map_elem.md)
+    * [`bpf_get_branch_snapshot`](../helper-function/bpf_get_branch_snapshot.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
+    * [`bpf_get_cgroup_classid`](../helper-function/bpf_get_cgroup_classid.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
     * [`bpf_get_current_ancestor_cgroup_id`](../helper-function/bpf_get_current_ancestor_cgroup_id.md) [:octicons-tag-24: v6.4](https://github.com/torvalds/linux/commit/c501bf55c88b834adefda870c7c092ec9052a437)
     * [`bpf_get_current_cgroup_id`](../helper-function/bpf_get_current_cgroup_id.md) [:octicons-tag-24: v6.4](https://github.com/torvalds/linux/commit/c501bf55c88b834adefda870c7c092ec9052a437)
+    * [`bpf_get_current_comm`](../helper-function/bpf_get_current_comm.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
     * [`bpf_get_current_pid_tgid`](../helper-function/bpf_get_current_pid_tgid.md) [:octicons-tag-24: v6.10](https://github.com/torvalds/linux/commit/eb166e522c77699fc19bfa705652327a1e51a117)
     * [`bpf_get_current_task`](../helper-function/bpf_get_current_task.md)
     * [`bpf_get_current_task_btf`](../helper-function/bpf_get_current_task_btf.md)
+    * [`bpf_get_current_uid_gid`](../helper-function/bpf_get_current_uid_gid.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
     * [`bpf_get_local_storage`](../helper-function/bpf_get_local_storage.md)
     * [`bpf_get_netns_cookie`](../helper-function/bpf_get_netns_cookie.md)
     * [`bpf_get_ns_current_pid_tgid`](../helper-function/bpf_get_ns_current_pid_tgid.md) [:octicons-tag-24: v6.10](https://github.com/torvalds/linux/commit/eb166e522c77699fc19bfa705652327a1e51a117)
@@ -867,6 +874,7 @@ Socket ops programs are attached to cGroups via the [`BPF_PROG_ATTACH`](../sysca
     * [`bpf_get_prandom_u32`](../helper-function/bpf_get_prandom_u32.md)
     * [`bpf_get_smp_processor_id`](../helper-function/bpf_get_smp_processor_id.md)
     * [`bpf_get_socket_cookie`](../helper-function/bpf_get_socket_cookie.md)
+    * [`bpf_get_task_stack`](../helper-function/bpf_get_task_stack.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
     * [`bpf_getsockopt`](../helper-function/bpf_getsockopt.md)
     * [`bpf_jiffies64`](../helper-function/bpf_jiffies64.md)
     * [`bpf_kptr_xchg`](../helper-function/bpf_kptr_xchg.md)
@@ -885,6 +893,8 @@ Socket ops programs are attached to cGroups via the [`BPF_PROG_ATTACH`](../sysca
     * [`bpf_map_update_elem`](../helper-function/bpf_map_update_elem.md)
     * [`bpf_per_cpu_ptr`](../helper-function/bpf_per_cpu_ptr.md)
     * [`bpf_perf_event_output`](../helper-function/bpf_perf_event_output.md)
+    * [`bpf_perf_event_read`](../helper-function/bpf_perf_event_read.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
+    * [`bpf_perf_event_read_value`](../helper-function/bpf_perf_event_read_value.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/ae0a457f5d33c336f3c4259a258f8b537531a04b)
     * [`bpf_probe_read_kernel`](../helper-function/bpf_probe_read_kernel.md)
     * [`bpf_probe_read_kernel_str`](../helper-function/bpf_probe_read_kernel_str.md)
     * [`bpf_probe_read_user`](../helper-function/bpf_probe_read_user.md)
@@ -898,6 +908,8 @@ Socket ops programs are attached to cGroups via the [`BPF_PROG_ATTACH`](../sysca
     * [`bpf_ringbuf_reserve_dynptr`](../helper-function/bpf_ringbuf_reserve_dynptr.md)
     * [`bpf_ringbuf_submit`](../helper-function/bpf_ringbuf_submit.md)
     * [`bpf_ringbuf_submit_dynptr`](../helper-function/bpf_ringbuf_submit_dynptr.md)
+    * [`bpf_send_signal`](../helper-function/bpf_send_signal.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
+    * [`bpf_send_signal_thread`](../helper-function/bpf_send_signal_thread.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
     * [`bpf_setsockopt`](../helper-function/bpf_setsockopt.md)
     * [`bpf_sk_storage_delete`](../helper-function/bpf_sk_storage_delete.md)
     * [`bpf_sk_storage_get`](../helper-function/bpf_sk_storage_get.md)
@@ -916,8 +928,12 @@ Socket ops programs are attached to cGroups via the [`BPF_PROG_ATTACH`](../sysca
     * [`bpf_spin_unlock`](../helper-function/bpf_spin_unlock.md)
     * [`bpf_store_hdr_opt`](../helper-function/bpf_store_hdr_opt.md)
     * [`bpf_strncmp`](../helper-function/bpf_strncmp.md)
+    * [`bpf_strtol`](../helper-function/bpf_strtol.md) [:octicons-tag-24: v6.1](https://github.com/torvalds/linux/commit/8a67f2de9b1dc3cf8b75b4bf589efb1f08e3e9b8)
+    * [`bpf_strtoul`](../helper-function/bpf_strtoul.md) [:octicons-tag-24: v6.1](https://github.com/torvalds/linux/commit/8a67f2de9b1dc3cf8b75b4bf589efb1f08e3e9b8)
     * [`bpf_tail_call`](../helper-function/bpf_tail_call.md)
     * [`bpf_task_pt_regs`](../helper-function/bpf_task_pt_regs.md)
+    * [`bpf_task_storage_delete`](../helper-function/bpf_task_storage_delete.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
+    * [`bpf_task_storage_get`](../helper-function/bpf_task_storage_get.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
     * [`bpf_tcp_sock`](../helper-function/bpf_tcp_sock.md)
     * [`bpf_this_cpu_ptr`](../helper-function/bpf_this_cpu_ptr.md)
     * [`bpf_timer_cancel`](../helper-function/bpf_timer_cancel.md)
@@ -934,17 +950,8 @@ Socket ops programs are attached to cGroups via the [`BPF_PROG_ATTACH`](../sysca
 <!-- [PROG_KFUNC_REF] -->
 ??? abstract "Supported kfuncs"
     - [`__bpf_trap`](../kfuncs/__bpf_trap.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
-    - [`bpf_arena_alloc_pages`](../kfuncs/bpf_arena_alloc_pages.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
-    - [`bpf_arena_free_pages`](../kfuncs/bpf_arena_free_pages.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
-    - [`bpf_arena_reserve_pages`](../kfuncs/bpf_arena_reserve_pages.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_cast_to_kern_ctx`](../kfuncs/bpf_cast_to_kern_ctx.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_cgroup_read_xattr`](../kfuncs/bpf_cgroup_read_xattr.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
-    - [`bpf_copy_from_user_dynptr`](../kfuncs/bpf_copy_from_user_dynptr.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
-    - [`bpf_copy_from_user_str`](../kfuncs/bpf_copy_from_user_str.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
-    - [`bpf_copy_from_user_str_dynptr`](../kfuncs/bpf_copy_from_user_str_dynptr.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
-    - [`bpf_copy_from_user_task_dynptr`](../kfuncs/bpf_copy_from_user_task_dynptr.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
-    - [`bpf_copy_from_user_task_str`](../kfuncs/bpf_copy_from_user_task_str.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
-    - [`bpf_copy_from_user_task_str_dynptr`](../kfuncs/bpf_copy_from_user_task_str_dynptr.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_dynptr_adjust`](../kfuncs/bpf_dynptr_adjust.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_dynptr_clone`](../kfuncs/bpf_dynptr_clone.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_dynptr_copy`](../kfuncs/bpf_dynptr_copy.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
@@ -958,6 +965,8 @@ Socket ops programs are attached to cGroups via the [`BPF_PROG_ATTACH`](../sysca
     - [`bpf_dynptr_slice`](../kfuncs/bpf_dynptr_slice.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_dynptr_slice_rdwr`](../kfuncs/bpf_dynptr_slice_rdwr.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_get_kmem_cache`](../kfuncs/bpf_get_kmem_cache.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
+    - [`bpf_get_mem_cgroup`](../kfuncs/bpf_get_mem_cgroup.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
+    - [`bpf_get_root_mem_cgroup`](../kfuncs/bpf_get_root_mem_cgroup.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_iter_bits_destroy`](../kfuncs/bpf_iter_bits_destroy.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_iter_bits_new`](../kfuncs/bpf_iter_bits_new.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_iter_bits_next`](../kfuncs/bpf_iter_bits_next.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
@@ -967,12 +976,6 @@ Socket ops programs are attached to cGroups via the [`BPF_PROG_ATTACH`](../sysca
     - [`bpf_iter_css_task_destroy`](../kfuncs/bpf_iter_css_task_destroy.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_iter_css_task_new`](../kfuncs/bpf_iter_css_task_new.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_iter_css_task_next`](../kfuncs/bpf_iter_css_task_next.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
-    - [`bpf_iter_dmabuf_destroy`](../kfuncs/bpf_iter_dmabuf_destroy.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
-    - [`bpf_iter_dmabuf_new`](../kfuncs/bpf_iter_dmabuf_new.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
-    - [`bpf_iter_dmabuf_next`](../kfuncs/bpf_iter_dmabuf_next.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
-    - [`bpf_iter_kmem_cache_destroy`](../kfuncs/bpf_iter_kmem_cache_destroy.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
-    - [`bpf_iter_kmem_cache_new`](../kfuncs/bpf_iter_kmem_cache_new.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
-    - [`bpf_iter_kmem_cache_next`](../kfuncs/bpf_iter_kmem_cache_next.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_iter_num_destroy`](../kfuncs/bpf_iter_num_destroy.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_iter_num_new`](../kfuncs/bpf_iter_num_new.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_iter_num_next`](../kfuncs/bpf_iter_num_next.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
@@ -985,12 +988,17 @@ Socket ops programs are attached to cGroups via the [`BPF_PROG_ATTACH`](../sysca
     - [`bpf_local_irq_restore`](../kfuncs/bpf_local_irq_restore.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_local_irq_save`](../kfuncs/bpf_local_irq_save.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_map_sum_elem_count`](../kfuncs/bpf_map_sum_elem_count.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
+    - [`bpf_mem_cgroup_memory_events`](../kfuncs/bpf_mem_cgroup_memory_events.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
+    - [`bpf_mem_cgroup_page_state`](../kfuncs/bpf_mem_cgroup_page_state.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
+    - [`bpf_mem_cgroup_usage`](../kfuncs/bpf_mem_cgroup_usage.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
+    - [`bpf_mem_cgroup_vm_events`](../kfuncs/bpf_mem_cgroup_vm_events.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_preempt_disable`](../kfuncs/bpf_preempt_disable.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_preempt_enable`](../kfuncs/bpf_preempt_enable.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_probe_read_kernel_dynptr`](../kfuncs/bpf_probe_read_kernel_dynptr.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_probe_read_kernel_str_dynptr`](../kfuncs/bpf_probe_read_kernel_str_dynptr.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_probe_read_user_dynptr`](../kfuncs/bpf_probe_read_user_dynptr.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_probe_read_user_str_dynptr`](../kfuncs/bpf_probe_read_user_str_dynptr.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
+    - [`bpf_put_mem_cgroup`](../kfuncs/bpf_put_mem_cgroup.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_rcu_read_lock`](../kfuncs/bpf_rcu_read_lock.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_rcu_read_unlock`](../kfuncs/bpf_rcu_read_unlock.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_rdonly_cast`](../kfuncs/bpf_rdonly_cast.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
@@ -1006,8 +1014,10 @@ Socket ops programs are attached to cGroups via the [`BPF_PROG_ATTACH`](../sysca
     - [`bpf_strchrnul`](../kfuncs/bpf_strchrnul.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_strcmp`](../kfuncs/bpf_strcmp.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_strcspn`](../kfuncs/bpf_strcspn.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
-    - [`bpf_stream_vprintk_impl`](../kfuncs/bpf_stream_vprintk_impl.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
+    - [`bpf_stream_print_stack`](../kfuncs/bpf_stream_print_stack.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
+    - [`bpf_stream_vprintk`](../kfuncs/bpf_stream_vprintk.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_strlen`](../kfuncs/bpf_strlen.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
+    - [`bpf_strncasecmp`](../kfuncs/bpf_strncasecmp.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_strncasestr`](../kfuncs/bpf_strncasestr.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_strnchr`](../kfuncs/bpf_strnchr.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_strnlen`](../kfuncs/bpf_strnlen.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
@@ -1015,9 +1025,10 @@ Socket ops programs are attached to cGroups via the [`BPF_PROG_ATTACH`](../sysca
     - [`bpf_strrchr`](../kfuncs/bpf_strrchr.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_strspn`](../kfuncs/bpf_strspn.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_strstr`](../kfuncs/bpf_strstr.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
-    - [`bpf_task_work_schedule_resume_impl`](../kfuncs/bpf_task_work_schedule_resume_impl.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
-    - [`bpf_task_work_schedule_signal_impl`](../kfuncs/bpf_task_work_schedule_signal_impl.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
+    - [`bpf_task_work_schedule_resume`](../kfuncs/bpf_task_work_schedule_resume.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
+    - [`bpf_task_work_schedule_signal`](../kfuncs/bpf_task_work_schedule_signal.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
+    - [`bpf_timer_cancel_async`](../kfuncs/bpf_timer_cancel_async.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_wq_init`](../kfuncs/bpf_wq_init.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
-    - [`bpf_wq_set_callback_impl`](../kfuncs/bpf_wq_set_callback_impl.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
+    - [`bpf_wq_set_callback`](../kfuncs/bpf_wq_set_callback.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
     - [`bpf_wq_start`](../kfuncs/bpf_wq_start.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/59422464266f8baa091edcb3779f0955a21abf00) - 
 <!-- [/PROG_KFUNC_REF] -->

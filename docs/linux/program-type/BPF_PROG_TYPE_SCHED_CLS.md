@@ -131,6 +131,33 @@ enum tcx_action_base {
 
 For more details of tcx, see the [<nospell>LSFMM</nospell>+BPF Summit Recap and Video: Revamping Global Socket Iterator, Netkit and Next Steps](https://ebpf.foundation/lsfmmbpf-summit-recap-and-video-revamping-global-socket-iterator-netkit-next-steps/).
 
+### netkit
+
+[:octicons-tag-24: v6.7](https://github.com/torvalds/linux/commit/35dfaad7188cdc043fde31709c796f5a692ba2bd)
+
+Since kernel v6.7 TC programs can also be attached to [netkit](https://lwn.net/Articles/949960/) devices, using the `BPF_NETKIT_PRIMARY` and `BPF_NETKIT_PEER` attach types from the table above. A netkit device is a virtual device pair, similar to a `veth` pair, built specifically for container networking: the primary device stays in the host network namespace and the peer device is moved into the container's namespace. The difference with attaching to a `veth` pair is that the programs run directly in the device's transmit path, before the packet is handed to the other end, so no qdisc or classifier infrastructure is involved.
+
+The two attach types select which end of the pair the programs run on. Programs attached with `BPF_NETKIT_PRIMARY` run when the primary device transmits, so they see traffic going from the host towards the container. Programs attached with `BPF_NETKIT_PEER` run when the peer device transmits, so they see the container's outgoing traffic. Both attach types are managed through the primary device: passing the peer's interface index to the attach operation is rejected with `-EACCES`, which means a workload inside the container cannot detach or replace the policy the host attached to its own peer device.
+
+Programs are attached via [`BPF_LINK_CREATE`](../syscall/BPF_LINK_CREATE.md#netkit) or `BPF_PROG_ATTACH`, and like tcx, netkit uses the multi-program management API, so multiple programs can be attached to the same end of the pair.
+
+netkit programs use their own return codes, with the same values as their tcx counterparts:
+
+```c
+enum netkit_action {
+	NETKIT_NEXT	= -1,
+	NETKIT_PASS	= 0,
+	NETKIT_DROP	= 2,
+	NETKIT_REDIRECT	= 7,
+};
+```
+
+`NETKIT_NEXT` continues with the next attached program, `NETKIT_PASS` delivers the packet to the other end of the pair, `NETKIT_DROP` drops it and `NETKIT_REDIRECT` redirects it (the packet has to have been redirected with a helper such as [`bpf_redirect`](../helper-function/bpf_redirect.md) or [`bpf_redirect_peer`](../helper-function/bpf_redirect_peer.md) before returning this value). Unlike tcx, where unknown return codes are mapped to `TCX_NEXT`, a netkit program returning an unknown value drops the packet.
+
+Each end of the pair also has a default policy, which is applied when no program is attached: `NETKIT_PASS` (the default) forwards all packets, while a device created with the `blackhole` policy drops everything until an attached program explicitly returns `NETKIT_PASS` or `NETKIT_REDIRECT`. Combined with the primary-only attachment this allows building default-deny setups where the container gets no connectivity unless the eBPF program on the host allows it.
+
+By default a netkit device operates in `NETKIT_L3` mode, in which packets carry no Ethernet header; the device pair can instead be created in `NETKIT_L2` mode to work on Ethernet frames.
+
 ## Helper functions
 
 Not all helper functions are available in all program types. These are the helper calls available for TC classifier programs:
@@ -145,18 +172,23 @@ Not all helper functions are available in all program types. These are the helpe
     * [`bpf_csum_diff`](../helper-function/bpf_csum_diff.md)
     * [`bpf_csum_level`](../helper-function/bpf_csum_level.md)
     * [`bpf_csum_update`](../helper-function/bpf_csum_update.md)
+    * [`bpf_current_task_under_cgroup`](../helper-function/bpf_current_task_under_cgroup.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
     * [`bpf_dynptr_data`](../helper-function/bpf_dynptr_data.md)
     * [`bpf_dynptr_from_mem`](../helper-function/bpf_dynptr_from_mem.md)
     * [`bpf_dynptr_read`](../helper-function/bpf_dynptr_read.md)
     * [`bpf_dynptr_write`](../helper-function/bpf_dynptr_write.md)
     * [`bpf_fib_lookup`](../helper-function/bpf_fib_lookup.md)
+    * [`bpf_find_vma`](../helper-function/bpf_find_vma.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
     * [`bpf_for_each_map_elem`](../helper-function/bpf_for_each_map_elem.md)
+    * [`bpf_get_branch_snapshot`](../helper-function/bpf_get_branch_snapshot.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
     * [`bpf_get_cgroup_classid`](../helper-function/bpf_get_cgroup_classid.md)
     * [`bpf_get_current_ancestor_cgroup_id`](../helper-function/bpf_get_current_ancestor_cgroup_id.md) [:octicons-tag-24: v6.4](https://github.com/torvalds/linux/commit/c501bf55c88b834adefda870c7c092ec9052a437)
     * [`bpf_get_current_cgroup_id`](../helper-function/bpf_get_current_cgroup_id.md) [:octicons-tag-24: v6.4](https://github.com/torvalds/linux/commit/c501bf55c88b834adefda870c7c092ec9052a437)
+    * [`bpf_get_current_comm`](../helper-function/bpf_get_current_comm.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
     * [`bpf_get_current_pid_tgid`](../helper-function/bpf_get_current_pid_tgid.md) [:octicons-tag-24: v6.10](https://github.com/torvalds/linux/commit/eb166e522c77699fc19bfa705652327a1e51a117)
     * [`bpf_get_current_task`](../helper-function/bpf_get_current_task.md)
     * [`bpf_get_current_task_btf`](../helper-function/bpf_get_current_task_btf.md)
+    * [`bpf_get_current_uid_gid`](../helper-function/bpf_get_current_uid_gid.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
     * [`bpf_get_hash_recalc`](../helper-function/bpf_get_hash_recalc.md)
     * [`bpf_get_listener_sock`](../helper-function/bpf_get_listener_sock.md)
     * [`bpf_get_netns_cookie`](../helper-function/bpf_get_netns_cookie.md) [:octicons-tag-24: v6.13](https://github.com/torvalds/linux/commit/eb62f49de7eca5917be8cebb3ad8aa3710af7021)
@@ -167,6 +199,7 @@ Not all helper functions are available in all program types. These are the helpe
     * [`bpf_get_smp_processor_id`](../helper-function/bpf_get_smp_processor_id.md)
     * [`bpf_get_socket_cookie`](../helper-function/bpf_get_socket_cookie.md)
     * [`bpf_get_socket_uid`](../helper-function/bpf_get_socket_uid.md)
+    * [`bpf_get_task_stack`](../helper-function/bpf_get_task_stack.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
     * [`bpf_jiffies64`](../helper-function/bpf_jiffies64.md)
     * [`bpf_kptr_xchg`](../helper-function/bpf_kptr_xchg.md)
     * [`bpf_ktime_get_boot_ns`](../helper-function/bpf_ktime_get_boot_ns.md)
@@ -184,6 +217,8 @@ Not all helper functions are available in all program types. These are the helpe
     * [`bpf_map_update_elem`](../helper-function/bpf_map_update_elem.md)
     * [`bpf_per_cpu_ptr`](../helper-function/bpf_per_cpu_ptr.md)
     * [`bpf_perf_event_output`](../helper-function/bpf_perf_event_output.md)
+    * [`bpf_perf_event_read`](../helper-function/bpf_perf_event_read.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
+    * [`bpf_perf_event_read_value`](../helper-function/bpf_perf_event_read_value.md) [:octicons-tag-24: v6.15](https://github.com/torvalds/linux/commit/ae0a457f5d33c336f3c4259a258f8b537531a04b)
     * [`bpf_probe_read_kernel`](../helper-function/bpf_probe_read_kernel.md)
     * [`bpf_probe_read_kernel_str`](../helper-function/bpf_probe_read_kernel_str.md)
     * [`bpf_probe_read_user`](../helper-function/bpf_probe_read_user.md)
@@ -199,6 +234,8 @@ Not all helper functions are available in all program types. These are the helpe
     * [`bpf_ringbuf_reserve_dynptr`](../helper-function/bpf_ringbuf_reserve_dynptr.md)
     * [`bpf_ringbuf_submit`](../helper-function/bpf_ringbuf_submit.md)
     * [`bpf_ringbuf_submit_dynptr`](../helper-function/bpf_ringbuf_submit_dynptr.md)
+    * [`bpf_send_signal`](../helper-function/bpf_send_signal.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
+    * [`bpf_send_signal_thread`](../helper-function/bpf_send_signal_thread.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
     * [`bpf_set_hash`](../helper-function/bpf_set_hash.md)
     * [`bpf_set_hash_invalid`](../helper-function/bpf_set_hash_invalid.md)
     * [`bpf_sk_assign`](../helper-function/bpf_sk_assign.md)
@@ -236,8 +273,12 @@ Not all helper functions are available in all program types. These are the helpe
     * [`bpf_spin_lock`](../helper-function/bpf_spin_lock.md)
     * [`bpf_spin_unlock`](../helper-function/bpf_spin_unlock.md)
     * [`bpf_strncmp`](../helper-function/bpf_strncmp.md)
+    * [`bpf_strtol`](../helper-function/bpf_strtol.md) [:octicons-tag-24: v6.1](https://github.com/torvalds/linux/commit/8a67f2de9b1dc3cf8b75b4bf589efb1f08e3e9b8)
+    * [`bpf_strtoul`](../helper-function/bpf_strtoul.md) [:octicons-tag-24: v6.1](https://github.com/torvalds/linux/commit/8a67f2de9b1dc3cf8b75b4bf589efb1f08e3e9b8)
     * [`bpf_tail_call`](../helper-function/bpf_tail_call.md)
     * [`bpf_task_pt_regs`](../helper-function/bpf_task_pt_regs.md)
+    * [`bpf_task_storage_delete`](../helper-function/bpf_task_storage_delete.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
+    * [`bpf_task_storage_get`](../helper-function/bpf_task_storage_get.md) [:octicons-tag-24: v6.16](https://github.com/torvalds/linux/commit/ee971630f20fd421fffcdc4543731ebcb54ed6d0)
     * [`bpf_tcp_check_syncookie`](../helper-function/bpf_tcp_check_syncookie.md)
     * [`bpf_tcp_gen_syncookie`](../helper-function/bpf_tcp_gen_syncookie.md)
     * [`bpf_tcp_raw_check_syncookie_ipv4`](../helper-function/bpf_tcp_raw_check_syncookie_ipv4.md)
@@ -260,21 +301,12 @@ Not all helper functions are available in all program types. These are the helpe
 <!-- [PROG_KFUNC_REF] -->
 ??? abstract "Supported kfuncs"
     - [`__bpf_trap`](../kfuncs/__bpf_trap.md)
-    - [`bpf_arena_alloc_pages`](../kfuncs/bpf_arena_alloc_pages.md)
-    - [`bpf_arena_free_pages`](../kfuncs/bpf_arena_free_pages.md)
-    - [`bpf_arena_reserve_pages`](../kfuncs/bpf_arena_reserve_pages.md)
     - [`bpf_cast_to_kern_ctx`](../kfuncs/bpf_cast_to_kern_ctx.md)
     - [`bpf_cgroup_acquire`](../kfuncs/bpf_cgroup_acquire.md)
     - [`bpf_cgroup_ancestor`](../kfuncs/bpf_cgroup_ancestor.md)
     - [`bpf_cgroup_from_id`](../kfuncs/bpf_cgroup_from_id.md)
     - [`bpf_cgroup_read_xattr`](../kfuncs/bpf_cgroup_read_xattr.md)
     - [`bpf_cgroup_release`](../kfuncs/bpf_cgroup_release.md)
-    - [`bpf_copy_from_user_dynptr`](../kfuncs/bpf_copy_from_user_dynptr.md)
-    - [`bpf_copy_from_user_str`](../kfuncs/bpf_copy_from_user_str.md)
-    - [`bpf_copy_from_user_str_dynptr`](../kfuncs/bpf_copy_from_user_str_dynptr.md)
-    - [`bpf_copy_from_user_task_dynptr`](../kfuncs/bpf_copy_from_user_task_dynptr.md)
-    - [`bpf_copy_from_user_task_str`](../kfuncs/bpf_copy_from_user_task_str.md)
-    - [`bpf_copy_from_user_task_str_dynptr`](../kfuncs/bpf_copy_from_user_task_str_dynptr.md)
     - [`bpf_crypto_decrypt`](../kfuncs/bpf_crypto_decrypt.md)
     - [`bpf_crypto_encrypt`](../kfuncs/bpf_crypto_encrypt.md)
     - [`bpf_ct_change_status`](../kfuncs/bpf_ct_change_status.md)
@@ -298,6 +330,8 @@ Not all helper functions are available in all program types. These are the helpe
     - [`bpf_dynptr_slice`](../kfuncs/bpf_dynptr_slice.md)
     - [`bpf_dynptr_slice_rdwr`](../kfuncs/bpf_dynptr_slice_rdwr.md)
     - [`bpf_get_kmem_cache`](../kfuncs/bpf_get_kmem_cache.md)
+    - [`bpf_get_mem_cgroup`](../kfuncs/bpf_get_mem_cgroup.md)
+    - [`bpf_get_root_mem_cgroup`](../kfuncs/bpf_get_root_mem_cgroup.md)
     - [`bpf_iter_bits_destroy`](../kfuncs/bpf_iter_bits_destroy.md)
     - [`bpf_iter_bits_new`](../kfuncs/bpf_iter_bits_new.md)
     - [`bpf_iter_bits_next`](../kfuncs/bpf_iter_bits_next.md)
@@ -307,12 +341,6 @@ Not all helper functions are available in all program types. These are the helpe
     - [`bpf_iter_css_task_destroy`](../kfuncs/bpf_iter_css_task_destroy.md)
     - [`bpf_iter_css_task_new`](../kfuncs/bpf_iter_css_task_new.md)
     - [`bpf_iter_css_task_next`](../kfuncs/bpf_iter_css_task_next.md)
-    - [`bpf_iter_dmabuf_destroy`](../kfuncs/bpf_iter_dmabuf_destroy.md)
-    - [`bpf_iter_dmabuf_new`](../kfuncs/bpf_iter_dmabuf_new.md)
-    - [`bpf_iter_dmabuf_next`](../kfuncs/bpf_iter_dmabuf_next.md)
-    - [`bpf_iter_kmem_cache_destroy`](../kfuncs/bpf_iter_kmem_cache_destroy.md)
-    - [`bpf_iter_kmem_cache_new`](../kfuncs/bpf_iter_kmem_cache_new.md)
-    - [`bpf_iter_kmem_cache_next`](../kfuncs/bpf_iter_kmem_cache_next.md)
     - [`bpf_iter_num_destroy`](../kfuncs/bpf_iter_num_destroy.md)
     - [`bpf_iter_num_new`](../kfuncs/bpf_iter_num_new.md)
     - [`bpf_iter_num_next`](../kfuncs/bpf_iter_num_next.md)
@@ -322,18 +350,33 @@ Not all helper functions are available in all program types. These are the helpe
     - [`bpf_iter_task_vma_destroy`](../kfuncs/bpf_iter_task_vma_destroy.md)
     - [`bpf_iter_task_vma_new`](../kfuncs/bpf_iter_task_vma_new.md)
     - [`bpf_iter_task_vma_next`](../kfuncs/bpf_iter_task_vma_next.md)
+    - [`bpf_list_add`](../kfuncs/bpf_list_add.md)
     - [`bpf_list_back`](../kfuncs/bpf_list_back.md)
+    - [`bpf_list_del`](../kfuncs/bpf_list_del.md)
+    - [`bpf_list_empty`](../kfuncs/bpf_list_empty.md)
     - [`bpf_list_front`](../kfuncs/bpf_list_front.md)
+    - [`bpf_list_is_first`](../kfuncs/bpf_list_is_first.md)
+    - [`bpf_list_is_last`](../kfuncs/bpf_list_is_last.md)
     - [`bpf_list_pop_back`](../kfuncs/bpf_list_pop_back.md)
     - [`bpf_list_pop_front`](../kfuncs/bpf_list_pop_front.md)
+    - [`bpf_list_push_back`](../kfuncs/bpf_list_push_back.md)
     - [`bpf_list_push_back_impl`](../kfuncs/bpf_list_push_back_impl.md)
+    - [`bpf_list_push_front`](../kfuncs/bpf_list_push_front.md)
     - [`bpf_list_push_front_impl`](../kfuncs/bpf_list_push_front_impl.md)
     - [`bpf_local_irq_restore`](../kfuncs/bpf_local_irq_restore.md)
     - [`bpf_local_irq_save`](../kfuncs/bpf_local_irq_save.md)
     - [`bpf_map_sum_elem_count`](../kfuncs/bpf_map_sum_elem_count.md)
+    - [`bpf_mem_cgroup_memory_events`](../kfuncs/bpf_mem_cgroup_memory_events.md)
+    - [`bpf_mem_cgroup_page_state`](../kfuncs/bpf_mem_cgroup_page_state.md)
+    - [`bpf_mem_cgroup_usage`](../kfuncs/bpf_mem_cgroup_usage.md)
+    - [`bpf_mem_cgroup_vm_events`](../kfuncs/bpf_mem_cgroup_vm_events.md)
+    - [`bpf_obj_drop`](../kfuncs/bpf_obj_drop.md)
     - [`bpf_obj_drop_impl`](../kfuncs/bpf_obj_drop_impl.md)
+    - [`bpf_obj_new`](../kfuncs/bpf_obj_new.md)
     - [`bpf_obj_new_impl`](../kfuncs/bpf_obj_new_impl.md)
+    - [`bpf_percpu_obj_drop`](../kfuncs/bpf_percpu_obj_drop.md)
     - [`bpf_percpu_obj_drop_impl`](../kfuncs/bpf_percpu_obj_drop_impl.md)
+    - [`bpf_percpu_obj_new`](../kfuncs/bpf_percpu_obj_new.md)
     - [`bpf_percpu_obj_new_impl`](../kfuncs/bpf_percpu_obj_new_impl.md)
     - [`bpf_preempt_disable`](../kfuncs/bpf_preempt_disable.md)
     - [`bpf_preempt_enable`](../kfuncs/bpf_preempt_enable.md)
@@ -341,6 +384,8 @@ Not all helper functions are available in all program types. These are the helpe
     - [`bpf_probe_read_kernel_str_dynptr`](../kfuncs/bpf_probe_read_kernel_str_dynptr.md)
     - [`bpf_probe_read_user_dynptr`](../kfuncs/bpf_probe_read_user_dynptr.md)
     - [`bpf_probe_read_user_str_dynptr`](../kfuncs/bpf_probe_read_user_str_dynptr.md)
+    - [`bpf_put_mem_cgroup`](../kfuncs/bpf_put_mem_cgroup.md)
+    - [`bpf_rbtree_add`](../kfuncs/bpf_rbtree_add.md)
     - [`bpf_rbtree_add_impl`](../kfuncs/bpf_rbtree_add_impl.md)
     - [`bpf_rbtree_first`](../kfuncs/bpf_rbtree_first.md)
     - [`bpf_rbtree_left`](../kfuncs/bpf_rbtree_left.md)
@@ -350,6 +395,7 @@ Not all helper functions are available in all program types. These are the helpe
     - [`bpf_rcu_read_lock`](../kfuncs/bpf_rcu_read_lock.md)
     - [`bpf_rcu_read_unlock`](../kfuncs/bpf_rcu_read_unlock.md)
     - [`bpf_rdonly_cast`](../kfuncs/bpf_rdonly_cast.md)
+    - [`bpf_refcount_acquire`](../kfuncs/bpf_refcount_acquire.md)
     - [`bpf_refcount_acquire_impl`](../kfuncs/bpf_refcount_acquire_impl.md)
     - [`bpf_res_spin_lock`](../kfuncs/bpf_res_spin_lock.md)
     - [`bpf_res_spin_lock_irqsave`](../kfuncs/bpf_res_spin_lock_irqsave.md)
@@ -369,8 +415,10 @@ Not all helper functions are available in all program types. These are the helpe
     - [`bpf_strchrnul`](../kfuncs/bpf_strchrnul.md)
     - [`bpf_strcmp`](../kfuncs/bpf_strcmp.md)
     - [`bpf_strcspn`](../kfuncs/bpf_strcspn.md)
-    - [`bpf_stream_vprintk_impl`](../kfuncs/bpf_stream_vprintk_impl.md)
+    - [`bpf_stream_print_stack`](../kfuncs/bpf_stream_print_stack.md)
+    - [`bpf_stream_vprintk`](../kfuncs/bpf_stream_vprintk.md)
     - [`bpf_strlen`](../kfuncs/bpf_strlen.md)
+    - [`bpf_strncasecmp`](../kfuncs/bpf_strncasecmp.md)
     - [`bpf_strncasestr`](../kfuncs/bpf_strncasestr.md)
     - [`bpf_strnchr`](../kfuncs/bpf_strnchr.md)
     - [`bpf_strnlen`](../kfuncs/bpf_strnlen.md)
@@ -384,11 +432,12 @@ Not all helper functions are available in all program types. These are the helpe
     - [`bpf_task_get_cgroup1`](../kfuncs/bpf_task_get_cgroup1.md)
     - [`bpf_task_release`](../kfuncs/bpf_task_release.md)
     - [`bpf_task_under_cgroup`](../kfuncs/bpf_task_under_cgroup.md)
-    - [`bpf_task_work_schedule_resume_impl`](../kfuncs/bpf_task_work_schedule_resume_impl.md)
-    - [`bpf_task_work_schedule_signal_impl`](../kfuncs/bpf_task_work_schedule_signal_impl.md)
+    - [`bpf_task_work_schedule_resume`](../kfuncs/bpf_task_work_schedule_resume.md)
+    - [`bpf_task_work_schedule_signal`](../kfuncs/bpf_task_work_schedule_signal.md)
     - [`bpf_throw`](../kfuncs/bpf_throw.md)
+    - [`bpf_timer_cancel_async`](../kfuncs/bpf_timer_cancel_async.md)
     - [`bpf_wq_init`](../kfuncs/bpf_wq_init.md)
-    - [`bpf_wq_set_callback_impl`](../kfuncs/bpf_wq_set_callback_impl.md)
+    - [`bpf_wq_set_callback`](../kfuncs/bpf_wq_set_callback.md)
     - [`bpf_wq_start`](../kfuncs/bpf_wq_start.md)
     - [`bpf_xdp_ct_alloc`](../kfuncs/bpf_xdp_ct_alloc.md)
     - [`bpf_xdp_ct_lookup`](../kfuncs/bpf_xdp_ct_lookup.md)

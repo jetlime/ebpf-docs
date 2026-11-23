@@ -874,3 +874,38 @@ patterns:
     - name: bpf_strcasecmp
     - name: bpf_task_work_schedule_resume_impl
     - name: bpf_task_work_schedule_signal_impl
+    - name: bpf_stream_print_stack
+    - name: bpf_stream_vprintk
+    - name: bpf_strncasecmp
+    - name: bpf_task_work_schedule_resume
+    - name: bpf_task_work_schedule_signal
+    - name: bpf_timer_cancel_async
+    - name: bpf_wq_set_callback
+    - name: bbr_cwnd_event_tx_start
+    - name: cubictcp_cwnd_event_tx_start
+    - name: dctcp_cwnd_event_tx_start
+    - name: bpf_io_uring_submit_sqes
+    - name: bpf_io_uring_get_region
+    - name: bpf_obj_drop
+    - name: bpf_obj_new
+    - name: bpf_percpu_obj_new
+    - name: bpf_percpu_obj_drop
+    - name: bpf_refcount_acquire
+    - name: bpf_list_push_back
+    - name: bpf_list_push_front
+    - name: bpf_rbtree_add
+    - name: scx_bpf_dsq_reenq
+    - name: scx_bpf_sub_dispatch
+    - name: scx_bpf_dsq_move_to_local___v2
+    - name: bpf_sock_read_xattr
+    - name: bpf_icmp_send
+    - name: scx_bpf_sub_grant
+    - name: scx_bpf_sub_revoke
+    - name: scx_bpf_sub_caps
+    - name: scx_bpf_sub_kill_bstr
+    - name: scx_bpf_online_cmask
+    - name: bpf_ksock_create
+    - name: bpf_ksock_connect
+    - name: bpf_ksock_acquire
+    - name: bpf_ksock_release
+    - name: bpf_ksock_send

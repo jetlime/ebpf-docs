@@ -20,15 +20,9 @@ Set timer expiration N nanoseconds from the current time. The configured callbac
 
 _flags_ can be one of:
 
-**BPF_F_TIMER_ABS**
+* **BPF_F_TIMER_ABS**: Start the timer in absolute expire value instead of the default relative one.
 
-&nbsp;&nbsp;&nbsp;&nbsp;Start the timer in absolute expire value instead of the default relative one.
-
-**BPF_F_TIMER_CPU_PIN**
-
-&nbsp;&nbsp;&nbsp;&nbsp;Timer will be pinned to the CPU of the caller.
-
-&nbsp;&nbsp;&nbsp;&nbsp;
+* **BPF_F_TIMER_CPU_PIN**: Timer will be pinned to the CPU of the caller.
 
 ### Returns
 
@@ -41,6 +35,8 @@ _flags_ can be one of:
 
 !!! example "Docs could be improved"
     This part of the docs is incomplete, contributions are very welcome
+
+Note that a timer loses its callback when it is canceled. Calling this helper after a [`bpf_timer_cancel`](bpf_timer_cancel.md) therefore returns `-EINVAL` until a new callback is assigned with [`bpf_timer_set_callback`](bpf_timer_set_callback.md).
 
 ### Program types
 
